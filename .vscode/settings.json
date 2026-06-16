@@ -1,0 +1,7 @@
+{
+  "terraform.languageServer.enable": true,
+  "terraform.languageServer.args": [
+    "--experimental-modules-workspace"
+  ],
+  "editor.formatOnSave": true
+}

@@ -1,0 +1,16 @@
+branch: main
+check:
+  # Enforce checkov security checks by default
+  - CKV_AWS_135 # Ensure EBS volumes are encrypted
+  - CKV_AWS_16  # Ensure RDS instances are encrypted
+  - CKV_AWS_17  # Ensure RDS instances have deletion protection
+  - CKV_AWS_130 # Ensure VPC flow logging is enabled
+  - CKV_AWS_88  # Ensure EKS cluster endpoint is not publicly accessible (we'll manage this via SG)
+  - CKV_AWS_2   # Ensure ALB HTTP to HTTPS redirection
+  - CKV_AWS_23  # Ensure Security Groups do not allow unrestricted ingress
+
+skip-check:
+  - CKV_AWS_18  # Ensure AWS API Gateway logging is enabled (not used)
+  - CKV_AWS_111 # Ensure IAM policies does not allow write access without constraints (skip for generic roles if needed)
+
+output: cli
