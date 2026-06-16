@@ -109,8 +109,3 @@ terraform destroy -auto-approve
 
 ---
 
-### Tips for your Interview:
-When you present this to recruiters or interviewers, mention these advanced points:
-1.  **"I automated secrets injection"**: Explain how you completely eliminated static passwords by utilizing `random_password` and AWS Secrets Manager.
-2.  **"I designed for secure, zero-hassle operations"**: Mention that you enabled `endpoint_public_access` strictly bound by IP whitelisting and eliminated SSH entirely in favor of AWS Systems Manager (SSM) for EKS nodes.
-3.  **"I built dynamic, HA infrastructure"**: Point out the conditional NAT Gateway logic, proving you know how to save money in `dev` while ensuring Multi-AZ resilience in `prod`.
