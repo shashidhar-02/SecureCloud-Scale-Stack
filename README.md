@@ -41,55 +41,51 @@ Follow these commands to configure, test, and deploy this infrastructure.
 
 ### Prerequisites
 
-* Terraform (v1.5+)
 * AWS CLI configured with active credentials (`aws configure`)
-* `tflint` and `checkov` installed locally.
+* Note: All other prerequisites (Terraform, TFLint, Checkov) can be automatically installed via our Makefile!
 
-### Step 1: Bootstrap the Backend (One-Time Setup)
+### Step 1: Install Tools
+Run the setup script via Makefile to install all required tooling automatically:
+```bash
+make setup
+```
+
+### Step 2: Bootstrap the Backend (One-Time Setup)
 Terraform uses S3 and DynamoDB to store and lock state files securely.
 
 ```bash
-chmod +x scripts/bootstrap-backend.sh
-./scripts/bootstrap-backend.sh dev
+make bootstrap ENV=dev
 ```
-*Note: Open `environments/dev/backend.tf` and update the `bucket` and `dynamodb_table` fields with the output from this script.*
+*Note: Open `environments/dev/backend.tf` and update the `bucket` and `dynamodb_table` fields with the output from this command.*
 
-### Step 2: Set Variables & Secure Access
-Navigate to the desired environment (e.g., `dev`):
-```bash
-cd environments/dev
-```
-
-In the `terraform.tfvars` file, ensure your variables are set. 
+### Step 3: Set Variables & Secure Access
+Open `environments/dev/terraform.tfvars` and ensure your variables are set. 
 **Crucial Steps for Execution:**
 1. Provide a valid `certificate_arn` for your ALB HTTPS listener.
-2. The `public_access_cidrs` in `main.tf` defaults to `0.0.0.0/0` for initial setup. Before applying to production, change this list to contain *only* your corporate VPN/office IP address (e.g., `["203.0.113.50/32"]`).
+2. The `public_access_cidrs` defaults to `0.0.0.0/0` for initial setup. Before applying to production, change this list to contain *only* your corporate VPN/office IP address (e.g., `["203.0.113.50/32"]`).
 
-### Step 3: Run DevSecOps Quality Gates
+### Step 4: Initialize & Run DevSecOps Quality Gates
 Run our pre-configured static analysis to catch misconfigurations and security vulnerabilities:
 
 ```bash
-# Initialize Terraform and download locked provider versions
-terraform init
+# Initialize Terraform
+make init ENV=dev
 
-# Ensure code is formatted correctly
-terraform fmt -check -recursive ../../
-
-# Run TFLint to check for AWS provider best practices
-tflint --recursive
+# Run formatting and linting (TFLint)
+make lint
 
 # Run Checkov for comprehensive security scanning
-checkov -d ../../
+make scan
 ```
 
-### Step 4: Plan and Deploy
+### Step 5: Plan and Deploy
 
 ```bash
 # Generate and review the execution plan
-terraform plan -out=tfplan
+make plan ENV=dev
 
 # Apply the validated plan
-terraform apply "tfplan"
+make apply ENV=dev
 ```
 
 ### Step 5: Retrieve Database Credentials

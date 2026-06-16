@@ -23,9 +23,3 @@ output "database_subnet_group_name" {
   value       = aws_db_subnet_group.default.name
 }
 
-resource "aws_db_subnet_group" "default" {
-  name       = "${var.environment}-db-subnet-group"
-  subnet_ids = aws_subnet.database[*].id
-
-  tags = merge(var.tags, { Name = "${var.environment}-db-subnet-group" })
-}

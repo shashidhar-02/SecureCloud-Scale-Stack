@@ -171,3 +171,10 @@ resource "aws_iam_role_policy" "vpc_flow_logs_policy" {
   role   = aws_iam_role.vpc_flow_logs.id
   policy = data.aws_iam_policy_document.vpc_flow_logs_policy.json
 }
+
+resource "aws_db_subnet_group" "default" {
+  name       = "${var.environment}-db-subnet-group"
+  subnet_ids = aws_subnet.database[*].id
+
+  tags = merge(var.tags, { Name = "${var.environment}-db-subnet-group" })
+}
