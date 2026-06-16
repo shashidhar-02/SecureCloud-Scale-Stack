@@ -67,11 +67,3 @@ To ensure the high standards of this project are maintained:
 1. **Always add a module** if you find yourself copying code between environments.
 2. **Update documentation** in `variables.tf` for any new inputs.
 3. **Run security scans** locally before submitting a Pull Request.
-
----
-
-### Tips for your Interview:
-When you present this to recruiters or interviewers for those 4–6 LPA roles, mention these three points:
-1. **"I used state locking via DynamoDB"**: This shows you understand team environments where multiple engineers shouldn't corrupt the cloud state.
-2. **"I built this for parity"**: You can explain that by using the same modules for `dev` and `prod`, you ensure that the application *will* behave the same way once it reaches production.
-3. **"I automated the security"**: Emphasize that your `checkov` configuration acts as a "safety net" that saves hours of manual debugging.
