@@ -1,0 +1,76 @@
+name: Terraform CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  terraform:
+    name: Terraform format and validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: 1.16.5
+
+      - name: Check formatting
+        run: terraform fmt -check -recursive
+
+      - name: Initialize and validate all Terraform roots
+        shell: bash
+        run: |
+          while IFS= read -r directory; do
+            echo "Validating ${directory}"
+            terraform -chdir="${directory}" init -backend=false -input=false -no-color
+            terraform -chdir="${directory}" validate -no-color
+          done < <(find . -type f -name '*.tf' -not -path './.terraform/*' -printf '%h\n' | sort -u)
+
+  tflint:
+    name: TFLint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@6ffdbaa3be476b3431f7275c26966ef32ff60337 # v6.3.2
+        with:
+          tflint_version: v0.64.0
+
+      - name: Initialize plugins
+        run: tflint --init
+
+      - name: Lint Terraform
+        run: tflint --recursive
+
+  checkov:
+    name: Checkov security scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+
+      - name: Install Checkov
+        run: python -m pip install --disable-pip-version-check checkov==3.3.22
+
+      - name: Scan Terraform
+        run: checkov --directory . --config-file .checkov.yml

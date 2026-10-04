@@ -35,6 +35,17 @@ SecureCloud-Scale-Stack/
 └── .gitignore             # Strict exclusion of state files & sensitive data
 ```
 
+## Continuous Integration
+
+Pull requests and pushes to `main` run Terraform formatting and validation, TFLint, Checkov, CodeQL, and SonarCloud analysis. Terraform validation initializes each root with the backend disabled, so CI does not need AWS credentials or access to a remote state backend.
+
+To enable SonarCloud, import this repository into SonarCloud and add the following GitHub configuration under **Settings → Secrets and variables → Actions**:
+
+* Repository variables: `SONAR_ORGANIZATION` and `SONAR_PROJECT_KEY`
+* Repository secret: `SONAR_TOKEN`
+
+SonarCloud analysis waits for the quality gate and fails the workflow when the gate fails. SonarCloud is skipped for pull requests from forks because GitHub does not expose repository secrets to those workflows. Configure the Terraform CI and SonarCloud checks as required status checks in branch protection after their first successful run.
+
 ## 🛠️ Step-by-Step Implementation Guide
 
 Follow these commands to configure, test, and deploy this infrastructure.

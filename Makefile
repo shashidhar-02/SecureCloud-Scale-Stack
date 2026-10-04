@@ -1,4 +1,4 @@
-.PHONY: help setup lint plan apply destroy
+.PHONY: help setup bootstrap init fmt-check lint scan plan apply destroy
 
 ENV ?= dev
 
@@ -12,6 +12,7 @@ help:
 	@echo "  setup      Install all necessary prerequisites (Terraform, TFLint, Checkov)"
 	@echo "  bootstrap  Run the backend bootstrap script for the given ENV (e.g. make bootstrap ENV=dev)"
 	@echo "  init       Initialize Terraform for the given ENV"
+	@echo "  fmt-check  Check Terraform formatting without changing files"
 	@echo "  lint       Run Terraform fmt and TFLint across the codebase"
 	@echo "  scan       Run Checkov security scan"
 	@echo "  plan       Generate a Terraform plan for the given ENV"
@@ -27,6 +28,9 @@ bootstrap:
 
 init:
 	@cd environments/$(ENV) && terraform init
+
+fmt-check:
+	@terraform fmt -check -recursive
 
 lint:
 	@echo "Running terraform fmt..."
