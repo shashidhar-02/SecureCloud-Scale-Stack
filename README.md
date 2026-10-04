@@ -13,7 +13,7 @@ This project adheres strictly to the core principles of Senior DevOps engineerin
 * **Automated Secrets Management**: No passwords are passed via variables. RDS credentials are automatically generated via the `random` provider and securely pushed to AWS Secrets Manager.
 * **High Availability Parity**: In `dev`, a single NAT Gateway is used for cost savings. In `prod`, dynamic looping ensures exactly **one NAT Gateway per Availability Zone**, eliminating single points of failure.
 * **Reliability & Testability**: Every deployment is validated by static analysis and linting, ensuring code quality before provisioning.
-* **Security Guardrails**: Integrated static analysis scans (Checkov/Tflint). Known/intended deviations (like ALB public ingress) are explicitly marked with `# checkov:skip` inline annotations to prevent "noisy" CI/CD pipeline failures.
+* **Security Guardrails**: Integrated static analysis scans (Checkov/Tflint). ALB access logs are enabled and delivered to a dedicated, private, encrypted S3 bucket. Known/intended deviations (like ALB public ingress) are explicitly marked with `# checkov:skip` inline annotations to prevent "noisy" CI/CD pipeline failures.
 
 ## 📂 Project Structure
 
