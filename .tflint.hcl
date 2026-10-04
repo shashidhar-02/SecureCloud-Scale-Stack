@@ -8,7 +8,7 @@ rule "aws_instance_invalid_type" {
     enabled = true
 }
 
-rule "aws_s3_bucket_name_invalid" {
+rule "aws_s3_bucket_name" {
     enabled = true
 }
 

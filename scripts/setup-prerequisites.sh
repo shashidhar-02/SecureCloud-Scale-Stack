@@ -1,5 +1,5 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
 echo "🚀 Setting up SecureCloud-Scale-Stack prerequisites..."
 
@@ -12,7 +12,7 @@ if [ "$OS" = "Linux" ]; then
     # Install Terraform
     if ! command -v terraform &> /dev/null; then
         echo "Installing Terraform..."
-        sudo apt-get update && sudo apt-get install -y gnupg software-properties-common curl
+        sudo apt-get update && sudo apt-get install -y gnupg software-properties-common curl wget lsb-release
         wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
         gpg --no-default-keyring --keyring /usr/share/keyrings/hashicorp-archive-keyring.gpg --fingerprint
         echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] \
@@ -34,8 +34,8 @@ if [ "$OS" = "Linux" ]; then
     # Install Checkov
     if ! command -v checkov &> /dev/null; then
         echo "Installing Checkov..."
-        sudo apt-get update && sudo apt-get install -y python3-pip
-        pip3 install -U checkov
+        sudo apt-get update && sudo apt-get install -y pipx
+        pipx install --include-deps checkov
     else
         echo "✅ Checkov is already installed."
     fi

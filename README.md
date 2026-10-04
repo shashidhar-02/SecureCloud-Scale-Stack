@@ -37,7 +37,12 @@ SecureCloud-Scale-Stack/
 
 ## Continuous Integration
 
-Pull requests and pushes to `main` run Terraform formatting and validation, TFLint, Checkov, CodeQL, and SonarCloud analysis. Terraform validation initializes each root with the backend disabled, so CI does not need AWS credentials or access to a remote state backend.
+Pull requests and pushes to `main` run Terraform formatting and validation,
+TFLint, Checkov, GitHub's default CodeQL code-scanning setup, and SonarCloud
+analysis. The repository uses GitHub's default CodeQL setup; do not enable a
+second advanced CodeQL workflow for the same repository. Terraform validation
+initializes each root with the backend disabled, so CI does not need AWS
+credentials or access to a remote state backend.
 
 To enable SonarCloud, import this repository into SonarCloud and add the following GitHub configuration under **Settings → Secrets and variables → Actions**:
 
@@ -62,18 +67,27 @@ make setup
 ```
 
 ### Step 2: Bootstrap the Backend (One-Time Setup)
-Terraform uses S3 and DynamoDB to store and lock state files securely.
+Terraform uses an S3 bucket and DynamoDB table to store and lock state. The
+bootstrap command creates stable, account-specific names; rerunning it is safe.
 
 ```bash
 make bootstrap ENV=dev
+make init ENV=dev
 ```
-*Note: Open `environments/dev/backend.tf` and update the `bucket` and `dynamodb_table` fields with the output from this command.*
+
+The backend configuration is supplied to Terraform by `make init`; do not edit
+the partial S3 backend block in `environments/dev/backend.tf`. `make plan`,
+`make apply`, and `make destroy` initialize the selected environment
+automatically. Set `AWS_REGION` if you want to use a region other than
+`us-east-1`.
 
 ### Step 3: Set Variables & Secure Access
-Open `environments/dev/terraform.tfvars` and ensure your variables are set. 
+Create `environments/dev/terraform.tfvars` with values for the required
+environment variables declared in `environments/dev/variables.tf`.
 **Crucial Steps for Execution:**
 1. Provide a valid `certificate_arn` for your ALB HTTPS listener.
-2. The `public_access_cidrs` defaults to `0.0.0.0/0` for initial setup. Before applying to production, change this list to contain *only* your corporate VPN/office IP address (e.g., `["203.0.113.50/32"]`).
+2. Set `public_access_cidrs` to only your corporate VPN/office IP address
+   (e.g., `["203.0.113.50/32"]`). This variable has no permissive default.
 
 ### Step 4: Initialize & Run DevSecOps Quality Gates
 Run our pre-configured static analysis to catch misconfigurations and security vulnerabilities:
@@ -99,7 +113,7 @@ make plan ENV=dev
 make apply ENV=dev
 ```
 
-### Step 5: Retrieve Database Credentials
+### Step 6: Retrieve Database Credentials
 Because passwords are no longer managed manually, retrieve your RDS password securely via the AWS CLI:
 ```bash
 aws secretsmanager get-secret-value \
@@ -111,8 +125,7 @@ aws secretsmanager get-secret-value \
 ## 🧹 Cleanup
 To avoid ongoing AWS charges, destroy the infrastructure when finished:
 ```bash
-terraform destroy -auto-approve
+make destroy ENV=dev
 ```
 
 ---
-

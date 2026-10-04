@@ -26,7 +26,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Validate SonarCloud configuration
+      - name: Check SonarCloud configuration
+        id: configuration
         env:
           SONAR_ORGANIZATION: ${{ vars.SONAR_ORGANIZATION }}
           SONAR_PROJECT_KEY: ${{ vars.SONAR_PROJECT_KEY }}
@@ -34,12 +35,15 @@ jobs:
         run: |
           for name in SONAR_ORGANIZATION SONAR_PROJECT_KEY SONAR_TOKEN; do
             if [[ -z "${!name}" ]]; then
-              echo "::error::Configure ${name} in repository variables or secrets before running SonarCloud."
-              exit 1
+              echo "::notice::Skipping SonarCloud because ${name} is not configured."
+              echo "enabled=false" >> "$GITHUB_OUTPUT"
+              exit 0
             fi
           done
+          echo "enabled=true" >> "$GITHUB_OUTPUT"
 
       - name: Analyze with SonarCloud
+        if: steps.configuration.outputs.enabled == 'true'
         uses: SonarSource/sonarqube-scan-action@d209202bc7d53ff1cc128f7f907dac145c9d6ae9 # v8.3.0
         env:
           SONAR_HOST_URL: https://sonarcloud.io
